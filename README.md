@@ -4,15 +4,16 @@
 
 ## 프로젝트 소개
 
-**오늘의 할 일**은 브라우저에 상태를 저장하는 가벼운 할 일 관리 앱입니다.
+브라우저(localStorage)에 상태를 저장하는 가벼운 할 일 관리 앱입니다.
 
-- 할 일 추가/완료 처리/삭제
+- 할 일 추가/완료 처리/삭제, 더블클릭으로 내용 수정
+- 마감일 지정
 - 우선순위 설정 (높음 / 보통 / 낮음)
 - 카테고리 태그 (업무 / 개인 / 쇼핑) 및 카테고리별 필터
 - 상태별 필터 (전체 / 진행중 / 완료)
 - 정렬 (생성일순 / 이름순 / 마감일순)
 - 텍스트 검색
-- 라이트/다크 테마 전환
+- 라이트/다크 테마 전환 (입력 중이 아닐 때 `D` 키)
 
 ## 관련 링크
 
@@ -23,7 +24,7 @@
 - Next.js 16.2.9 (App Router, Turbopack)
 - React 19.2.7
 - Tailwind CSS 4.3.1
-- shadcn/ui 4.11.0 (radix-maia 스타일, taupe 베이스)
+- shadcn/ui 4.11.0 (radix-mira 스타일, taupe 베이스)
 - radix-ui 1.6.0
 - TypeScript 5.9.3
 - ESLint 9.39.4
@@ -48,6 +49,8 @@ bun run build      # 프로덕션 빌드
 bun run start      # 빌드 결과 실행
 bun run lint       # ESLint
 bun run typecheck  # tsc --noEmit
+bun run test       # Vitest 실행
+bun run test:watch # Vitest watch 모드
 bun run format     # Prettier 포맷팅
 ```
 
