@@ -16,7 +16,6 @@
 
 ## 관련 링크
 
-- 강의 본문: https://docs.claude-hunt.com
 - 수강생 결과물 공유: https://claude-hunt.com
 
 ## 기술 스택
@@ -48,14 +47,6 @@ bun run typecheck  # tsc --noEmit
 bun run format     # Prettier 포맷팅
 ```
 
-## 챕터별 시작 브랜치
-
-각 레슨은 시작 시점의 코드 상태를 브랜치로 제공합니다. 레슨 본문에서 안내하는 브랜치로 전환한 뒤 따라가시면 됩니다.
-
-```shell
-git checkout ch02-03
-```
-
 ## 컴포넌트 추가
 
 shadcn/ui 컴포넌트는 다음과 같이 추가합니다.
@@ -65,12 +56,6 @@ bunx --bun shadcn@latest add button
 ```
 
 `components/ui` 디렉토리에 컴포넌트가 추가됩니다.
-
-## 컴포넌트 사용
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
 
 ## Contributors
 
