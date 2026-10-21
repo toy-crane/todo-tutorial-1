@@ -392,4 +392,16 @@ describe("Todo 카테고리별 필터", () => {
     await user.click(within(filterGroup).getByRole("radio", { name: "전체" }));
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
+
+  it("필터 결과만 비었을 때는 첫 할 일 안내 대신 조건 불일치 메시지를 보여준다", async () => {
+    const user = userEvent.setup();
+    render(<TodoList />);
+    await addTodo(user, "장보기");
+    await screen.findByText("장보기");
+
+    await user.click(screen.getByRole("radio", { name: "완료" }));
+
+    expect(screen.getByText("조건에 맞는 할 일이 없어요.")).toBeInTheDocument();
+    expect(screen.queryByText(/아직 할 일이 없어요/)).not.toBeInTheDocument();
+  });
 });
