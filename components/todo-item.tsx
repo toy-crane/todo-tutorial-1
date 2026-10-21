@@ -62,67 +62,73 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
   const priority = PRIORITY_META[todo.priority] ?? PRIORITY_META[DEFAULT_PRIORITY];
   const category = todo.category ? CATEGORY_META[todo.category] : undefined;
 
+  const badgeBase =
+    "shrink-0 rounded-full border px-2 py-0.5 text-[0.625rem] font-medium leading-none";
+
   return (
-    <li className="flex items-center gap-3 rounded-md border border-border px-3 py-2">
+    <li
+      className={cn(
+        "group flex items-start gap-3 rounded-lg border border-border bg-card px-3.5 py-3 shadow-xs transition-colors hover:bg-accent/40",
+        todo.completed && "bg-muted/30"
+      )}
+    >
       <Checkbox
         checked={todo.completed}
         onCheckedChange={() => onToggle(todo.id)}
         aria-label={todo.completed ? "완료 취소" : "완료로 표시"}
+        className="mt-0.5"
       />
 
-      {editing ? (
-        <Input
-          ref={inputRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={commit}
-          className="h-7 flex-1"
-          aria-label="할 일 편집"
-        />
-      ) : (
-        <span
-          onDoubleClick={startEditing}
-          className={cn(
-            "flex-1 cursor-pointer break-words",
-            todo.completed && "text-muted-foreground line-through"
-          )}
-        >
-          {todo.text}
-        </span>
-      )}
-
-      {todo.dueDate && (
-        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-          {todo.dueDate}
-        </span>
-      )}
-
-      {category && (
-        <span
-          className={cn(
-            "shrink-0 rounded-full border px-2 py-0.5 text-[0.625rem] font-medium leading-none",
-            category.badgeClass
-          )}
-        >
-          {category.label}
-        </span>
-      )}
-
-      <span
-        className={cn(
-          "shrink-0 rounded-full border px-2 py-0.5 text-[0.625rem] font-medium leading-none",
-          priority.badgeClass
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        {editing ? (
+          <Input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={commit}
+            className="h-7"
+            aria-label="할 일 편집"
+          />
+        ) : (
+          <span
+            onDoubleClick={startEditing}
+            className={cn(
+              "cursor-pointer break-words text-sm leading-snug",
+              todo.completed && "text-muted-foreground line-through"
+            )}
+          >
+            {todo.text}
+          </span>
         )}
-      >
-        {priority.label}
-      </span>
+
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-1.5",
+            todo.completed && "opacity-60"
+          )}
+        >
+          <span className={cn(badgeBase, priority.badgeClass)}>
+            {priority.label}
+          </span>
+          {category && (
+            <span className={cn(badgeBase, category.badgeClass)}>
+              {category.label}
+            </span>
+          )}
+          {todo.dueDate && (
+            <span className="ml-0.5 text-xs text-muted-foreground tabular-nums">
+              {todo.dueDate}
+            </span>
+          )}
+        </div>
+      </div>
 
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
+        className="-my-1 -mr-1.5 size-7 shrink-0 text-muted-foreground opacity-60 transition-opacity hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
         onClick={() => onDelete(todo.id)}
         aria-label="삭제"
       >
