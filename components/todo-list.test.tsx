@@ -198,7 +198,8 @@ describe("Todo 필터링", () => {
 
     await user.click(screen.getByRole("radio", { name: "완료" }));
 
-    expect(screen.getByText(/할 일이 없어요/)).toBeInTheDocument();
+    expect(screen.getByText(/조건에 맞는 할 일이 없어요/)).toBeInTheDocument();
+    expect(screen.queryByText(/첫 번째 할 일/)).not.toBeInTheDocument();
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
 
