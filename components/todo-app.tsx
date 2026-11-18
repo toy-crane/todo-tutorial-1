@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, useSyncExternalStore } from "react"
-import { Trash2Icon } from "lucide-react"
+import { PencilIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -18,14 +18,68 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "completed", label: "완료" },
 ]
 
+const isFilter = (v: string | null): v is Filter =>
+  v === "all" || v === "active" || v === "completed"
+
+// 필터를 URL(?filter=)에 반영해 새로고침과 링크 공유에도 유지한다
+const filterListeners = new Set<() => void>()
+const subscribeFilter = (listener: () => void) => {
+  filterListeners.add(listener)
+  window.addEventListener("popstate", listener)
+  return () => {
+    filterListeners.delete(listener)
+    window.removeEventListener("popstate", listener)
+  }
+}
+const getFilter = (): Filter => {
+  const v = new URLSearchParams(window.location.search).get("filter")
+  return isFilter(v) ? v : "all"
+}
+const setFilterInUrl = (filter: Filter) => {
+  const url = new URL(window.location.href)
+  if (filter === "all") url.searchParams.delete("filter")
+  else url.searchParams.set("filter", filter)
+  window.history.replaceState(null, "", url)
+  filterListeners.forEach((listener) => listener())
+}
+
 // localStorage 지원 여부는 바뀌지 않으므로 구독할 이벤트가 없다
 const subscribeNothing = () => () => {}
 
 export function TodoApp() {
-  const { todos, addTodo, toggleTodo, deleteTodo, editTodo, clearCompleted } =
-    useTodos()
+  const {
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    editTodo,
+    clearCompleted,
+    restoreTodos,
+  } = useTodos()
   const [draft, setDraft] = useState("")
-  const [filter, setFilter] = useState<Filter>("all")
+  const filter = useSyncExternalStore(
+    subscribeFilter,
+    getFilter,
+    () => "all" as Filter
+  )
+  const setFilter = setFilterInUrl
+  // 방금 지운 항목과 원래 위치. 값이 있으면 "실행 취소"를 보여 준다
+  const [undo, setUndo] = useState<{
+    message: string
+    removed: { todo: Todo; index: number }[]
+  } | null>(null)
+
+  const withUndo = (
+    message: string,
+    isRemoved: (todo: Todo) => boolean,
+    action: () => void
+  ) => {
+    const removed = todos.flatMap((todo, index) =>
+      isRemoved(todo) ? [{ todo, index }] : []
+    )
+    setUndo({ message, removed })
+    action()
+  }
 
   const completedCount = todos.filter((todo) => todo.completed).length
 
@@ -67,9 +121,10 @@ export function TodoApp() {
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="할 일을 입력하고 Enter"
+        placeholder="예: 우유 사기…"
         aria-label="새 할 일"
-        autoFocus
+        name="todo"
+        autoComplete="off"
       />
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList aria-label="필터">
@@ -93,18 +148,47 @@ export function TodoApp() {
               key={todo.id}
               todo={todo}
               onToggle={() => toggleTodo(todo.id)}
-              onDelete={() => deleteTodo(todo.id)}
+              onDelete={() =>
+                withUndo(
+                  `"${todo.text}"을(를) 지웠습니다`,
+                  (t) => t.id === todo.id,
+                  () => deleteTodo(todo.id)
+                )
+              }
               onEdit={(text) => editTodo(todo.id, text)}
             />
           ))}
         </ul>
       )}
+      <p role="status" aria-live="polite" className="text-sm">
+        {undo && (
+          <span className="flex items-center justify-between gap-2 text-muted-foreground">
+            {undo.message}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                restoreTodos(undo.removed)
+                setUndo(null)
+              }}
+            >
+              실행 취소
+            </Button>
+          </span>
+        )}
+      </p>
       {completedCount > 0 && (
         <div className="flex justify-end">
           <Button
             variant="ghost"
             size="sm"
-            onClick={clearCompleted}
+            onClick={() =>
+              withUndo(
+                `완료한 일 ${completedCount}개를 지웠습니다`,
+                (t) => t.completed,
+                clearCompleted
+              )
+            }
             className="text-muted-foreground hover:text-destructive"
           >
             완료한 일 지우기 ({completedCount})
@@ -184,12 +268,23 @@ function TodoItem({
           {todo.text}
         </span>
       )}
+      {!editing && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={startEdit}
+          aria-label={`${todo.text} 수정`}
+          className="touch-manipulation text-muted-foreground"
+        >
+          <PencilIcon />
+        </Button>
+      )}
       <Button
         variant="ghost"
         size="icon-sm"
         onClick={onDelete}
         aria-label={`${todo.text} 삭제`}
-        className="text-muted-foreground hover:text-destructive"
+        className="touch-manipulation text-muted-foreground hover:text-destructive"
       >
         <Trash2Icon />
       </Button>

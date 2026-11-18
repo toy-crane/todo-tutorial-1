@@ -1,11 +1,11 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist_Mono, Nunito_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-const nunitoSans = Nunito_Sans({subsets:['latin'],variable:'--font-sans'})
+const nunitoSans = Nunito_Sans({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -18,6 +18,13 @@ export const metadata: Metadata = {
     "Claude Code Playbook 강의 실습용 Next.js · shadcn/ui Todo 앱 저장소.",
 }
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,9 +32,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ko"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", nunitoSans.variable)}
+      className={cn(
+        "antialiased",
+        fontMono.variable,
+        "font-sans",
+        nunitoSans.variable
+      )}
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>
