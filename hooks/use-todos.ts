@@ -86,5 +86,16 @@ export function useTodos() {
     [update]
   )
 
-  return { todos, addTodo, toggleTodo, deleteTodo, editTodo, clearCompleted }
+  // 삭제를 되돌릴 때 이전 목록 전체를 그대로 복원한다
+  const restoreTodos = useCallback((prev: Todo[]) => writeTodos(prev), [])
+
+  return {
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    editTodo,
+    clearCompleted,
+    restoreTodos,
+  }
 }
