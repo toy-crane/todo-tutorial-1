@@ -63,13 +63,21 @@ export function TodoApp() {
     () => "all" as Filter
   )
   const setFilter = setFilterInUrl
-  // 삭제 직전의 목록. 값이 있으면 "실행 취소"를 보여 준다
-  const [undo, setUndo] = useState<{ message: string; prev: Todo[] } | null>(
-    null
-  )
+  // 방금 지운 항목과 원래 위치. 값이 있으면 "실행 취소"를 보여 준다
+  const [undo, setUndo] = useState<{
+    message: string
+    removed: { todo: Todo; index: number }[]
+  } | null>(null)
 
-  const withUndo = (message: string, action: () => void) => {
-    setUndo({ message, prev: todos })
+  const withUndo = (
+    message: string,
+    isRemoved: (todo: Todo) => boolean,
+    action: () => void
+  ) => {
+    const removed = todos.flatMap((todo, index) =>
+      isRemoved(todo) ? [{ todo, index }] : []
+    )
+    setUndo({ message, removed })
     action()
   }
 
@@ -141,8 +149,10 @@ export function TodoApp() {
               todo={todo}
               onToggle={() => toggleTodo(todo.id)}
               onDelete={() =>
-                withUndo(`"${todo.text}"을(를) 지웠습니다`, () =>
-                  deleteTodo(todo.id)
+                withUndo(
+                  `"${todo.text}"을(를) 지웠습니다`,
+                  (t) => t.id === todo.id,
+                  () => deleteTodo(todo.id)
                 )
               }
               onEdit={(text) => editTodo(todo.id, text)}
@@ -158,7 +168,7 @@ export function TodoApp() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                restoreTodos(undo.prev)
+                restoreTodos(undo.removed)
                 setUndo(null)
               }}
             >
@@ -175,6 +185,7 @@ export function TodoApp() {
             onClick={() =>
               withUndo(
                 `완료한 일 ${completedCount}개를 지웠습니다`,
+                (t) => t.completed,
                 clearCompleted
               )
             }

@@ -52,6 +52,17 @@ describe("웹 인터페이스 가이드라인 개선", () => {
     expect(itemTexts()).toEqual(["장보기", "청소하기"])
   })
 
+  it("삭제 후 다른 변경이 있어도 실행 취소는 지운 항목만 되돌린다", async () => {
+    const { user, itemTexts } = setup()
+    await user.click(screen.getByRole("button", { name: "장보기 삭제" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "새 할 일" }),
+      "운동하기{Enter}"
+    )
+    await user.click(screen.getByRole("button", { name: "실행 취소" }))
+    expect(itemTexts()).toEqual(["장보기", "운동하기", "청소하기"])
+  })
+
   it("완료한 일 지우기 후 실행 취소로 복원한다", async () => {
     const { user, itemTexts } = setup()
     await user.click(screen.getByRole("button", { name: /완료한 일 지우기/ }))
