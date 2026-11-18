@@ -86,30 +86,5 @@ export function useTodos() {
     [update]
   )
 
-  // 삭제된 항목만 원래 위치에 다시 끼워 넣는다. 그 사이의 추가, 수정, 다른 탭의 변경은 그대로 둔다
-  const restoreTodos = useCallback(
-    (removed: { todo: Todo; index: number }[]) =>
-      update((current) => {
-        const next = [...current]
-        const present = new Set(current.map((t) => t.id))
-        removed
-          .filter(({ todo }) => !present.has(todo.id))
-          .sort((a, b) => a.index - b.index)
-          .forEach(({ todo, index }) =>
-            next.splice(Math.min(index, next.length), 0, todo)
-          )
-        return next
-      }),
-    [update]
-  )
-
-  return {
-    todos,
-    addTodo,
-    toggleTodo,
-    deleteTodo,
-    editTodo,
-    clearCompleted,
-    restoreTodos,
-  }
+  return { todos, addTodo, toggleTodo, deleteTodo, editTodo, clearCompleted }
 }
